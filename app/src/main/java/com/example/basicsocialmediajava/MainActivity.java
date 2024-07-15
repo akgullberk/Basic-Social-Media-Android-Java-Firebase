@@ -17,6 +17,7 @@ import com.google.android.gms.tasks.OnFailureListener;
 import com.google.android.gms.tasks.OnSuccessListener;
 import com.google.firebase.auth.AuthResult;
 import com.google.firebase.auth.FirebaseAuth;
+import com.google.firebase.auth.FirebaseUser;
 
 public class MainActivity extends AppCompatActivity {
 
@@ -39,9 +40,39 @@ public class MainActivity extends AppCompatActivity {
         // Initialize Firebase Auth
         mAuth = FirebaseAuth.getInstance();
 
+        FirebaseUser user = mAuth.getCurrentUser();
+
+        if(user!= null){
+            Intent intent = new Intent(MainActivity.this, FeedActivity.class);
+            startActivity(intent);
+            finish();
+        }
+
     }
 
     public void signInClicked(View view){
+        String email = binding.emailText.getText().toString();
+        String password = binding.passwordText.getText().toString();
+
+        if(email.equals("") || password.equals("")){
+            Toast.makeText(this,"Enter email and password",Toast.LENGTH_LONG).show();
+        }else{
+            mAuth.signInWithEmailAndPassword(email,password).addOnSuccessListener(new OnSuccessListener<AuthResult>() {
+                @Override
+                public void onSuccess(AuthResult authResult) {
+                    Intent intent = new Intent(MainActivity.this,FeedActivity.class);
+                    startActivity(intent);
+                    finish();
+
+                }
+            }).addOnFailureListener(new OnFailureListener() {
+                @Override
+                public void onFailure(@NonNull Exception e) {
+                    Toast.makeText(MainActivity.this,e.getLocalizedMessage(),Toast.LENGTH_LONG).show();
+                }
+            });
+        }
+
 
 
 
