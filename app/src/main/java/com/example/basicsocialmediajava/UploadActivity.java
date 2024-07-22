@@ -7,6 +7,7 @@ import android.net.Uri;
 import android.os.Bundle;
 import android.provider.MediaStore;
 import android.view.View;
+import android.widget.Toast;
 
 import androidx.activity.EdgeToEdge;
 import androidx.activity.result.ActivityResult;
@@ -37,11 +38,15 @@ public class UploadActivity extends AppCompatActivity {
         binding = ActivityUploadBinding.inflate(getLayoutInflater());
         View view = binding.getRoot();
         setContentView(view);
+
+        registerLauncher();
+
         ViewCompat.setOnApplyWindowInsetsListener(findViewById(R.id.main), (v, insets) -> {
             Insets systemBars = insets.getInsets(WindowInsetsCompat.Type.systemBars());
             v.setPadding(systemBars.left, systemBars.top, systemBars.right, systemBars.bottom);
             return insets;
         });
+
 
 
     }
@@ -57,14 +62,15 @@ public class UploadActivity extends AppCompatActivity {
                 Snackbar.make(view,"Permission needed for gallery",Snackbar.LENGTH_INDEFINITE).setAction("Give permission", new View.OnClickListener() {
                     @Override
                     public void onClick(View v) {
-
+                        permissionLauncher.launch(Manifest.permission.READ_EXTERNAL_STORAGE);
                     }
                 }).show();
             }else{
-
+                permissionLauncher.launch(Manifest.permission.READ_EXTERNAL_STORAGE);
             }
         }else{
             Intent intentToGallery = new Intent(Intent.ACTION_PICK, MediaStore.Images.Media.EXTERNAL_CONTENT_URI);
+            activityResultLauncher.launch(intentToGallery);
 
         }
 
@@ -76,10 +82,22 @@ public class UploadActivity extends AppCompatActivity {
             public void onActivityResult(ActivityResult o) {
                 if(o.getResultCode()== RESULT_OK){
                     Intent intentFromResult = o.getData();
-                    if(intentFromResult!=null){
-                       imageData= intentFromResult.getData();
-                       binding.imageView.setImageURI(imageData);
+                    if(intentFromResult != null){
+                        imageData = intentFromResult.getData();
+                        binding.imageView.setImageURI(imageData);
                     }
+                }
+            }
+        });
+
+        permissionLauncher = registerForActivityResult(new ActivityResultContracts.RequestPermission(), new ActivityResultCallback<Boolean>() {
+            @Override
+            public void onActivityResult(Boolean o) {
+                if(o){
+                    Intent intentToGallery = new Intent(Intent.ACTION_PICK,MediaStore.Images.Media.EXTERNAL_CONTENT_URI);
+                    activityResultLauncher.launch(intentToGallery);
+                }else{
+                    Toast.makeText(UploadActivity.this, "Permission needed", Toast.LENGTH_LONG).show();
                 }
             }
         });
