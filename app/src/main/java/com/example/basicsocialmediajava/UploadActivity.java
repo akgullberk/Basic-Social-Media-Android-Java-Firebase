@@ -27,11 +27,16 @@ import com.google.android.gms.tasks.OnFailureListener;
 import com.google.android.gms.tasks.OnSuccessListener;
 import com.google.android.material.snackbar.Snackbar;
 import com.google.firebase.auth.FirebaseAuth;
+import com.google.firebase.auth.FirebaseUser;
+import com.google.firebase.firestore.DocumentReference;
+import com.google.firebase.firestore.FieldValue;
 import com.google.firebase.firestore.FirebaseFirestore;
 import com.google.firebase.storage.FirebaseStorage;
 import com.google.firebase.storage.StorageReference;
 import com.google.firebase.storage.UploadTask;
 
+import java.util.HashMap;
+import java.util.Objects;
 import java.util.UUID;
 
 public class UploadActivity extends AppCompatActivity {
@@ -81,7 +86,40 @@ public class UploadActivity extends AppCompatActivity {
             storageReference.child(imageName).putFile(imageData).addOnSuccessListener(new OnSuccessListener<UploadTask.TaskSnapshot>() {
                 @Override
                 public void onSuccess(UploadTask.TaskSnapshot taskSnapshot) {
+                    StorageReference newReference = firebaseStorage.getReference(imageName);
+                    newReference.getDownloadUrl().addOnSuccessListener(new OnSuccessListener<Uri>() {
+                        @Override
+                        public void onSuccess(Uri uri) {
+                            String downloadUrl = uri.toString();
 
+                            String comment = binding.commentText.getText().toString();
+
+                            FirebaseUser user = auth.getCurrentUser();
+                            String email = user.getEmail();
+
+                            HashMap<String, Object> postData = new HashMap<>();
+                            postData.put("useremail",email);
+                            postData.put("downloadurl",downloadUrl);
+                            postData.put("comment",comment);
+                            postData.put("date", FieldValue.serverTimestamp());
+
+
+                            firebaseFirestore.collection("Posts").add(postData).addOnSuccessListener(new OnSuccessListener<DocumentReference>() {
+                                @Override
+                                public void onSuccess(DocumentReference documentReference) {
+                                    Intent intent = new Intent(UploadActivity.this,FeedActivity.class);
+                                    intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
+                                    startActivity(intent);
+
+                                }
+                            }).addOnFailureListener(new OnFailureListener() {
+                                @Override
+                                public void onFailure(@NonNull Exception e) {
+                                    Toast.makeText(UploadActivity.this,e.getLocalizedMessage(),Toast.LENGTH_LONG).show();
+                                }
+                            });
+                        }
+                    });
                 }
             }).addOnFailureListener(new OnFailureListener() {
                 @Override
