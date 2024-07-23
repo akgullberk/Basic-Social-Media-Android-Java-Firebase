@@ -5,18 +5,29 @@ import android.os.Bundle;
 import android.view.Menu;
 import android.view.MenuInflater;
 import android.view.MenuItem;
+import android.widget.Toast;
 
 import androidx.activity.EdgeToEdge;
 import androidx.annotation.NonNull;
+import androidx.annotation.Nullable;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.core.graphics.Insets;
 import androidx.core.view.ViewCompat;
 import androidx.core.view.WindowInsetsCompat;
 
 import com.google.firebase.auth.FirebaseAuth;
+import com.google.firebase.firestore.DocumentSnapshot;
+import com.google.firebase.firestore.EventListener;
+import com.google.firebase.firestore.FirebaseFirestore;
+import com.google.firebase.firestore.FirebaseFirestoreException;
+import com.google.firebase.firestore.QuerySnapshot;
+
+import java.util.HashMap;
+import java.util.Map;
 
 public class FeedActivity extends AppCompatActivity {
     private FirebaseAuth auth;
+    private FirebaseFirestore firebaseFirestore;
 
 
     @Override
@@ -31,6 +42,33 @@ public class FeedActivity extends AppCompatActivity {
         });
 
         auth = FirebaseAuth.getInstance();
+        firebaseFirestore = FirebaseFirestore.getInstance();
+
+        getData();
+    }
+
+    private void getData(){
+        firebaseFirestore.collection("Posts").addSnapshotListener(new EventListener<QuerySnapshot>() {
+            @Override
+            public void onEvent(@Nullable QuerySnapshot value, @Nullable FirebaseFirestoreException error) {
+                if(error!=null){
+                    Toast.makeText(FeedActivity.this,error.getLocalizedMessage(),Toast.LENGTH_LONG).show();
+                }
+
+                if(value!=null){
+                   for(DocumentSnapshot snapshot : value.getDocuments()){
+                       Map<String, Object> data = snapshot.getData();
+
+                       String userEmail = (String) data.get("useremail");
+                       String comment = (String) data.get("comment");
+                       String donwloadUrl = (String) data.get("downloadurl");
+
+                       System.out.println(comment);
+
+                   }
+                }
+            }
+        });
     }
 
     @Override
