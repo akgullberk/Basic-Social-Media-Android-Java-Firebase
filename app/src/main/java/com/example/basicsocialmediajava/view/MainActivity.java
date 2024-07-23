@@ -1,4 +1,4 @@
-package com.example.basicsocialmediajava;
+package com.example.basicsocialmediajava.view;
 
 import android.content.Intent;
 import android.os.Bundle;
@@ -12,6 +12,7 @@ import androidx.core.graphics.Insets;
 import androidx.core.view.ViewCompat;
 import androidx.core.view.WindowInsetsCompat;
 
+import com.example.basicsocialmediajava.R;
 import com.example.basicsocialmediajava.databinding.ActivityMainBinding;
 import com.google.android.gms.tasks.OnFailureListener;
 import com.google.android.gms.tasks.OnSuccessListener;
