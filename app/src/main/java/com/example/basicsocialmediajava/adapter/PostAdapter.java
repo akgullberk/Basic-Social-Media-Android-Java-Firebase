@@ -9,6 +9,7 @@ import androidx.recyclerview.widget.RecyclerView;
 
 import com.example.basicsocialmediajava.databinding.RecyclerRowBinding;
 import com.example.basicsocialmediajava.model.Post;
+import com.squareup.picasso.Picasso;
 
 import java.util.ArrayList;
 
@@ -31,6 +32,7 @@ public class PostAdapter extends RecyclerView.Adapter<PostAdapter.PostHolder> {
     public void onBindViewHolder(@NonNull PostHolder holder, int position) {
         holder.recyclerRowBinding.recyclerViewUserEmailText.setText(postArrayList.get(position).email);
         holder.recyclerRowBinding.recyclerViewCommentText.setText(postArrayList.get(position).comment);
+        Picasso.get().load(postArrayList.get(position).downloadUrl).into(holder.recyclerRowBinding.recyclerViewImageView);
     }
 
     @Override

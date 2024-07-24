@@ -15,8 +15,10 @@ import androidx.appcompat.app.AppCompatActivity;
 import androidx.core.graphics.Insets;
 import androidx.core.view.ViewCompat;
 import androidx.core.view.WindowInsetsCompat;
+import androidx.recyclerview.widget.LinearLayoutManager;
 
 import com.example.basicsocialmediajava.R;
+import com.example.basicsocialmediajava.adapter.PostAdapter;
 import com.example.basicsocialmediajava.databinding.ActivityFeedBinding;
 import com.example.basicsocialmediajava.model.Post;
 import com.google.firebase.auth.FirebaseAuth;
@@ -24,6 +26,7 @@ import com.google.firebase.firestore.DocumentSnapshot;
 import com.google.firebase.firestore.EventListener;
 import com.google.firebase.firestore.FirebaseFirestore;
 import com.google.firebase.firestore.FirebaseFirestoreException;
+import com.google.firebase.firestore.Query;
 import com.google.firebase.firestore.QuerySnapshot;
 
 import java.util.ArrayList;
@@ -34,6 +37,7 @@ public class FeedActivity extends AppCompatActivity {
     private FirebaseFirestore firebaseFirestore;
     ArrayList<Post> postArrayList;
     private ActivityFeedBinding binding;
+    PostAdapter postAdapter;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -55,10 +59,15 @@ public class FeedActivity extends AppCompatActivity {
         postArrayList = new ArrayList<>();
 
         getData();
+
+        binding.recyclerView.setLayoutManager(new LinearLayoutManager(this));
+        postAdapter = new PostAdapter(postArrayList);
+        binding.recyclerView.setAdapter(postAdapter);
+
     }
 
     private void getData(){
-        firebaseFirestore.collection("Posts").addSnapshotListener(new EventListener<QuerySnapshot>() {
+        firebaseFirestore.collection("Posts").orderBy("date", Query.Direction.DESCENDING).addSnapshotListener(new EventListener<QuerySnapshot>() {
             @Override
             public void onEvent(@Nullable QuerySnapshot value, @Nullable FirebaseFirestoreException error) {
                 if(error!=null){
@@ -76,9 +85,8 @@ public class FeedActivity extends AppCompatActivity {
                        Post post = new Post(userEmail,comment,donwloadUrl);
                        postArrayList.add(post);
 
-
-
                    }
+                   postAdapter.notifyDataSetChanged();
                 }
             }
         });
